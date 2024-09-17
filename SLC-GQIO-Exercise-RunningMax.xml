@@ -19,7 +19,9 @@
 	<Script>
 		<Exe id="1" type="csharp">
 			<Value><![CDATA[[Project:SLC-GQIO-Exercise-RunningMax_1]]]></Value>
-			<!--<Param type="debug">true</Param>-->
+			<!--added precompile true and lib name-->
+			<Param type="preCompile">true</Param>
+			<Param type="libraryName">SLC-GQIO-Exercise-RunningMax</Param>
 			<Message></Message>
 		</Exe>
 	</Script>

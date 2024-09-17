@@ -58,22 +58,29 @@ namespace SLC_GQIO_Exercise_RunningTotal_1
 	[GQIMetaData(Name = "Running Total")]
 	public class MyCustomOperator : IGQIColumnOperator, IGQIRowOperator, IGQIInputArguments
 	{
-		private readonly GQIColumnDropdownArgument _firstColumnArg = new GQIColumnDropdownArgument("First Column") { IsRequired = true, Types = new GQIColumnType[] { GQIColumnType.Double } };
+		// change name of dropdown argumment (not needed) added _colNameArgument
+		private readonly GQIStringArgument _colNameArgument = new GQIStringArgument("Column Name") { IsRequired = true };
+		private readonly GQIColumnDropdownArgument _firstColumnArg = new GQIColumnDropdownArgument("NUMERIC VALUE") { IsRequired = true, Types = new GQIColumnType[] { GQIColumnType.Double } };
 
 		private GQIColumn _firstColumn;
 		private GQIDoubleColumn _newColumn;
 
-		private double totalCount = 0;
+		// added new var column name
+		private string _columnName;
+		private double runningMaximum = 0;
 
+		// added input argument
 		public GQIArgument[] GetInputArguments()
 		{
-			return new GQIArgument[] { _firstColumnArg };
+			return new GQIArgument[] { _firstColumnArg, _colNameArgument };
 		}
 
+		// get argument value for col name and put use it as name of new double col
 		public OnArgumentsProcessedOutputArgs OnArgumentsProcessed(OnArgumentsProcessedInputArgs args)
 		{
 			_firstColumn = args.GetArgumentValue(_firstColumnArg);
-			_newColumn = new GQIDoubleColumn("Running Total");
+			_columnName = args.GetArgumentValue(_colNameArgument);
+			_newColumn = new GQIDoubleColumn(_columnName);
 
 			return new OnArgumentsProcessedOutputArgs();
 		}
@@ -86,8 +93,14 @@ namespace SLC_GQIO_Exercise_RunningTotal_1
 		public void HandleRow(GQIEditableRow row)
 		{
 			var firstValue = row.GetValue<double>(_firstColumn);
-			totalCount += firstValue;
-			var result = totalCount;
+
+			// changed logic of getting running maximum instead of cumulative sum
+			if(runningMaximum < firstValue)
+			{
+				runningMaximum = firstValue;
+			}
+
+			var result = runningMaximum;
 			var resultRounded = Math.Round(result, 2);
 			row.SetValue(_newColumn, result, $"{resultRounded}");
 		}
